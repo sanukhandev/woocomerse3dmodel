@@ -1,0 +1,15 @@
+#product-3d-model {
+    width: 100%;
+    height: 500px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#product-3d-model canvas {
+    width: 100%;
+    height: 100%;
+}
+
+
+
+/* ------------------------------ Add More styles below ------------------------------ */
