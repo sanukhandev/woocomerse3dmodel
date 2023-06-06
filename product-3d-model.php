@@ -75,7 +75,7 @@ add_action( 'woocommerce_before_single_product_summary', 'display_3d_model_on_pr
 
 // Enqueue scripts and styles
 function enqueue_3d_model_scripts_and_styles() {
-    wp_enqueue_script( 'three', 'https://threejs.org/build/three.js', array(), null, true );
+    wp_enqueue_script( 'three', 'https://unpkg.com/three@0.139.2/build/three.min.js', array(), null, true );
     wp_enqueue_style( 'product-3d-model', plugins_url( '/css/product-3d-model.css', __FILE__ ) );
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_3d_model_scripts_and_styles' );
