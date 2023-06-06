@@ -45,31 +45,34 @@ function display_3d_model_on_product_page() {
     if ( ! empty( $model_url ) ) {
         echo '<div id="product-3d-model"></div>';
         echo '<script>
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-        var renderer = new THREE.WebGLRenderer();
-
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.getElementById("product-3d-model").appendChild( renderer.domElement );
-
-        var loader = new THREE.GLTFLoader();
-
-        loader.load( "' . esc_url( $model_url ) . '", function ( gltf ) {
-            scene.add( gltf.scene );
-        }, undefined, function ( error ) {
-            console.error( error );
-        } );
-
-        camera.position.z = 5;
-
-        var animate = function () {
-            requestAnimationFrame( animate );
-            renderer.render( scene, camera );
-        };
-
-        animate();
+        window.onload = function() {
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            var renderer = new THREE.WebGLRenderer();
+    
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.getElementById("product-3d-model").appendChild( renderer.domElement );
+    
+            var loader = new THREE.GLTFLoader();
+    
+            loader.load( "' . esc_url( $model_url ) . '", function ( gltf ) {
+                scene.add( gltf.scene );
+            }, undefined, function ( error ) {
+                console.error( error );
+            } );
+    
+            camera.position.z = 5;
+    
+            var animate = function () {
+                requestAnimationFrame( animate );
+                renderer.render( scene, camera );
+            };
+    
+            animate();
+        }
         </script>';
     }
+    
 }
 add_action( 'woocommerce_before_single_product_summary', 'display_3d_model_on_product_page' );
 
