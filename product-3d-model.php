@@ -58,7 +58,39 @@ add_action( 'woocommerce_single_product_summary', 'display_3d_model_on_product_p
 // Enqueue styles
 function enqueue_3d_model_styles() {
     wp_enqueue_style( 'product-3d-model', plugins_url( '/css/product-3d-model.css', __FILE__ ) );
-    enqueue main js file
     wp_enqueue_script( 'product-3d-model', plugins_url( '/js/product-3d-model.js', __FILE__ ) );
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_3d_model_styles' );
+
+
+function add_custom_data() {
+    if ( ! isset( $_POST['custom_option'] ) || ! isset( $_POST['product_id'] ) || ! isset( $_POST['quantity'] ) ) {
+        wp_send_json( array( 'error' => true, 'product_url' => get_permalink( $_POST['product_id'] ) ) );
+    }
+
+    $product_id = intval( $_POST['product_id'] );
+    $quantity = intval( $_POST['quantity'] );
+    $custom_option = sanitize_text_field( $_POST['custom_option'] );
+
+    // Add the product to the cart with the custom field
+    $passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+
+    if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, 0, array(), array( 'custom_option' => $custom_option ) ) ) {
+        do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+        wp_send_json_success();
+    } else {
+        wp_send_json( array( 'error' => true, 'product_url' => get_permalink( $product_id ) ) );
+    }
+
+    wp_die();
+}
+add_action( 'wp_ajax_add_custom_data', 'add_custom_data' );
+add_action( 'wp_ajax_nopriv_add_custom_data', 'add_custom_data' );
+
+// Store custom field in order item meta
+function add_custom_option_order_item_meta( $item, $cart_item_key, $values, $order ) {
+    if ( array_key_exists( 'custom_option', $values ) ) {
+        $item->add_meta_data( __( 'Custom Option', 'woocommerce' ), $values['custom_option'] );
+    }
+}
+add_action( 'woocommerce_checkout_create_order_line_item', 'add_custom_option_order_item_meta', 10, 4 );
