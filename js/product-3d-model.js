@@ -23,9 +23,11 @@ window.addEventListener(
 
 function jsonToReadableText(json) {
   let readableText = "Meterial Desing - \n";
-  for (const [key, value] of Object.entries(json)) {
-    const material = key.split("-")[1];
-    readableText += `${material} : ${value}\n`;
+  if(json){
+	  for (const [key, value] of Object.entries(json)) {
+         const material = key.split("-")[1];
+         readableText += `${material} : ${value}\n`;
+      }
   }
   return readableText;
 }
