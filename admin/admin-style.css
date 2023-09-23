@@ -1,0 +1,46 @@
+/* admin-style.css */
+
+/* Basic padding and styling for the form */
+.wrap form {
+    padding: 20px 0;
+    max-width: 600px;
+}
+
+.wrap form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.wrap form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+.wrap form input[type="submit"] {
+    margin-top: 20px;
+}
+
+/* Styling for the table displaying the models */
+.wrap table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.wrap table,
+.wrap table th,
+.wrap table td {
+    border: 1px solid #e1e1e1;
+}
+
+.wrap table th,
+.wrap table td {
+    padding: 10px 15px;
+    text-align: left;
+}
+
+.wrap table th {
+    background-color: #f9f9f9;
+}
