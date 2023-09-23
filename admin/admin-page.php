@@ -5,6 +5,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities.php';
 
 function db_3d_viewer_admin_page()
 {
+
+    die("Sanu Khan");
     global $wpdb;
     $table_name = $wpdb->prefix . "3d_viewer";
 
@@ -24,7 +26,8 @@ function db_3d_viewer_admin_page()
     echo '<label for="product_name">Product Name:</label>';
     echo '<input type="text" name="product_name" required>';
     echo '<label for="glb_url">GLB URL:</label>';
-    echo '<input type="text" name="glb_url" required>';
+    echo '<input type="text" name="glb_url" id="glb_url" required>';
+    echo '<button type="button" onclick="uploadGLB()" class="button">Select GLB</button>';
     echo '<input type="submit" value="Upload" class="button-primary">';
     echo '</form>';
 

@@ -1,12 +1,15 @@
 <?php
 
 /**
- * Plugin Name: DB 3D Product Viewer
- * Description: A plugin to view 3D products via GLB files.
+ * Plugin Name: 3D Model Showcase
+ * Plugin URI: https://www.innovz.it/
+ * Description: A plugin to upload and display 3D GLB files.
  * Version: 1.0
- * Author: Digital Buddha
- * Author URI: https://www.digitalbuddha.in/
+ * Author: Sanu Khan
+ * Author URI: https://www.innovz.it/
+ * License: GPL2
  */
+
 
 // Ensure that the file is not accessed directly.
 if (!defined('ABSPATH')) {
@@ -37,14 +40,29 @@ function db_3d_viewer_create_table()
 
 // Add admin menu.
 add_action('admin_menu', 'db_3d_viewer_menu');
+
 function db_3d_viewer_menu()
 {
-    add_submenu_page('tools.php', 'DB 3D Product Viewer', '3D Viewer', 'manage_options', 'db-3d-viewer', 'db_3d_viewer_admin_page');
+    add_menu_page(
+        '3D Model Showcase Admin',  // Page title
+        '3D Model Showcase',        // Menu title
+        'manage_options',         // Capability required to see the menu
+        'db-3d-viewer',           // Menu slug
+        'db_3d_viewer_admin_page', // The function to be called to output the content for this page
+        'dashicons-format-image', // Icon for the menu (I'm using a generic image icon, you can choose other dashicons or omit this parameter for default icon)
+        6                         // Position in the menu order where it should appear. The lower the number, the higher its position. 
+    );
 }
+
+
+
+
+
 
 // Admin page content.
 function db_3d_viewer_admin_page()
 {
+
     global $wpdb;
     $table_name = $wpdb->prefix . "3d_viewer";
 
@@ -56,14 +74,26 @@ function db_3d_viewer_admin_page()
         ));
     }
 
-    echo '<h2>Upload GLB File</h2>';
-    echo '<input type="button" value="Upload GLB" onclick="uploadGLB();" class="button-primary">';
+    echo '<div class="wrap">';
+    echo '<h1>DB 3D Product Viewer - Upload GLB File</h1>';
+
+    // Display the file upload form.
+    echo '<form method="post" action="">';
+    echo '<label for="product_name">Product Name:</label>';
+    echo '<input type="text" name="product_name" required>';
+    echo '<label for="glb_url">GLB URL:</label>';
+    echo '<input type="text" name="glb_url" id="glb_url" required>';
+    echo '<button type="button" onclick="uploadGLB()" class="button">Select GLB</button>';
+    echo '<input type="submit" value="Upload" class="button-primary">';
+    echo '</form>';
 
     // Displaying uploaded models.
     $results = $wpdb->get_results("SELECT * FROM $table_name");
 
     echo '<h2>Uploaded Models</h2>';
-    echo '<table>';
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead><tr><th>Product Name</th><th>GLB URL</th><th>Shortcode</th></tr></thead>';
+    echo '<tbody>';
     foreach ($results as $row) {
         echo '<tr>';
         echo '<td>' . esc_html($row->product_name) . '</td>';
@@ -71,11 +101,14 @@ function db_3d_viewer_admin_page()
         echo '<td>[db_3d_viewer glb_url="' . esc_url($row->glb_url) . '"]</td>';
         echo '</tr>';
     }
+    echo '</tbody>';
     echo '</table>';
+
+    echo '</div>';
 
     // JavaScript for the WordPress media uploader.
 ?>
-    <script>
+    <script type="text/javascript">
         function uploadGLB() {
             var uploader = wp.media({
                 title: 'Select GLB',
@@ -86,7 +119,9 @@ function db_3d_viewer_admin_page()
             }).on('select', function() {
                 var selection = uploader.state().get('selection');
                 var attachment = selection.first().toJSON();
-                // Save or process the attachment URL as needed...
+
+                // Assuming you'd want to populate a text input with the attachment URL.
+                document.querySelector('input[name="glb_url"]').value = attachment.url;
             }).open();
         }
     </script>
@@ -98,7 +133,7 @@ function db_3d_viewer_shortcode($atts)
 {
     $atts = shortcode_atts(array('glb_url' => ''), $atts, 'db_3d_viewer');
 
-    if (is_singular('product')) {
+    if (is_singular('product') && false) {
         // If inside a WooCommerce product.
         return '<button onclick="window.open(\'' . esc_url('https://phpstack-947027-3534862.cloudwaysapps.com/?modelUrl=' . $atts['glb_url']) . '\')">View 3D Model</button>';
     } else {
@@ -113,6 +148,10 @@ function db_3d_viewer_admin_assets($hook)
     // Ensure that scripts/styles are only loaded on our plugin's admin page.
     if ($hook != 'tools_page_db-3d-viewer') {
         return;
+    }
+
+    if (isset($_GET['page']) && $_GET['page'] == 'db-3d-viewer') {
+        wp_enqueue_media(); // This will enqueue the necessary Media Library scripts and styles
     }
 
     // Enqueue the admin styles.
@@ -134,6 +173,35 @@ function db_3d_viewer_public_assets()
 }
 
 add_action('wp_enqueue_scripts', 'db_3d_viewer_public_assets');
+
+function custom_glb_upload_validation($data, $file, $filename, $mimes)
+{
+    // Check if the file is a GLB
+    if (strpos($filename, '.glb') !== false) {
+        // Bypass WordPress's check and manually specify the MIME type
+        $data['type'] = 'model/gltf-binary';
+        $data['ext'] = 'glb';
+        $data['proper_filename'] = $filename;
+    }
+    return $data;
+}
+add_filter('wp_check_filetype_and_ext', 'custom_glb_upload_validation', 10, 4);
+
+function db_3d_viewer_custom_upload_mimes($mimes = array())
+{
+    $mimes['glb'] = 'model/gltf-binary';
+    error_log("The custom MIME type filter ran!");
+    return $mimes;
+}
+add_filter('upload_mimes', 'db_3d_viewer_custom_upload_mimes', 9999);
+
+function db_3d_viewer_enqueue_scripts()
+{
+    if (isset($_GET['page']) && $_GET['page'] == 'db-3d-viewer') {
+        wp_enqueue_media(); // This will enqueue the necessary Media Library scripts and styles
+    }
+}
+add_action('admin_enqueue_scripts', 'db_3d_viewer_enqueue_scripts');
 
 
 

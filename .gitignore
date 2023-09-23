@@ -1,0 +1,3 @@
+# Exclude all zip files from all folders
+
+ **/*.zip
